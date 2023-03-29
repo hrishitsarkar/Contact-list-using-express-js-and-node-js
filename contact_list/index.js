@@ -2,7 +2,9 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const port = 8000;
-
+//conncting the database
+const db = require('./config/mongoose');
+const Contact = require('./models/contact');
 
 const app = express();
 
@@ -39,11 +41,19 @@ var contactList = [
 
 
 app.get('/',function(req,res){
-    return res.render('home',{
-        title : 'My Contacts',
-        contact_list : contactList
+
+    Contact.find({}).then((contacts)=>{
+        return res.render('home',{
+            title : 'My Contacts',
+            contact_list : contacts
+        });
+    }).catch((err)=>{
+        console.log(err);
     });
-});
+        
+    });
+    
+
 app.get('/practice',function(req,res){
     return res.render('practice',{
         title : "lets play tonight"
@@ -65,9 +75,19 @@ app.post('/create-contact',function(req,res){
     //     name : req.body.name,
     //     phoneNo : req.body.phoneNo
     // });
-    contactList.push(req.body);
-    // return res.redirect('/');
+    // contactList.push(req.body);
+
+Contact.create({
+    name:req.body.name,
+    phoneNo:req.body.phoneNo
+}).then(()=>{
     return res.redirect('back');
+}).catch((err)=>{
+     console.log(err);
+});
+
+    // return res.redirect('/');
+    // return res.redirect('back');
 })
 
 
